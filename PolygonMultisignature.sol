@@ -1,4 +1,8 @@
 /**
+ *Submitted for verification at polygonscan.com on 2025-09-04
+*/
+
+/**
  *Submitted for verification at polygonscan.com on 2025-07-09
 */
 
@@ -9,7 +13,7 @@ interface LotteryRooms {
     function transferContractUSDT(address to, uint256 amount) external;
 }
 
-contract SimpleMultiSig {
+contract Multisignature {
     address[] public owners;
     uint256 public required;
     address public creator;
@@ -37,12 +41,19 @@ contract SimpleMultiSig {
         _;
     }
 
-    constructor(address[] memory _owners, uint256 _required) {
+    constructor(address[] memory _owners,address _creator, uint256 _required) {
         require(_owners.length >= _required, "Invalid config");
         owners = _owners;
         required = _required;
-        creator = msg.sender;
+        creator = _creator;
     }
+
+
+    function creatorChange(address _creator) external  { 
+        require(msg.sender != creator, "Creator cannot be removed");
+        creator = _creator;
+    }
+
 
     //Get All the Owner List
     function getOwners() external view returns (address[] memory) {
