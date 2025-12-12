@@ -89,11 +89,9 @@ library OFTComposeMsgCodec {
      * @param _msg The message.
      * @return The composed message.
      */
-    function composeMsg(bytes calldata _msg)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function composeMsg(
+        bytes calldata _msg
+    ) internal pure returns (bytes memory) {
         return _msg[COMPOSE_FROM_OFFSET:];
     }
 
@@ -244,10 +242,10 @@ interface IERC20 {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
+    function allowance(
+        address owner,
+        address spender
+    ) external view returns (uint256);
 
     /**
      * @dev Sets a `value` amount of tokens as the allowance of `spender` over the
@@ -377,9 +375,10 @@ interface IERC1363 is IERC20, IERC165 {
      * @param value The amount of tokens to be spent.
      * @return A boolean value indicating whether the operation succeeded unless throwing.
      */
-    function approveAndCall(address spender, uint256 value)
-        external
-        returns (bool);
+    function approveAndCall(
+        address spender,
+        uint256 value
+    ) external returns (bool);
 
     /**
      * @dev Sets a `value` amount of tokens as the allowance of `spender` over the
@@ -431,11 +430,7 @@ library SafeERC20 {
      * @dev Transfer `value` amount of `token` from the calling contract to `to`. If `token` returns no value,
      * non-reverting calls are assumed to be successful.
      */
-    function safeTransfer(
-        IERC20 token,
-        address to,
-        uint256 value
-    ) internal {
+    function safeTransfer(IERC20 token, address to, uint256 value) internal {
         _callOptionalReturn(token, abi.encodeCall(token.transfer, (to, value)));
     }
 
@@ -670,10 +665,10 @@ library SafeERC20 {
      *
      * This is a variant of {_callOptionalReturn} that silently catches all reverts and returns a bool instead.
      */
-    function _callOptionalReturnBool(IERC20 token, bytes memory data)
-        private
-        returns (bool)
-    {
+    function _callOptionalReturnBool(
+        IERC20 token,
+        bytes memory data
+    ) private returns (bool) {
         bool success;
         uint256 returnSize;
         uint256 returnValue;
@@ -790,9 +785,9 @@ pragma solidity ^0.8.0;
 /// @title The ConfirmedOwner contract
 /// @notice A contract with helpers for basic contract ownership.
 contract ConfirmedOwner is ConfirmedOwnerWithProposal {
-    constructor(address newOwner)
-        ConfirmedOwnerWithProposal(newOwner, address(0))
-    {}
+    constructor(
+        address newOwner
+    ) ConfirmedOwnerWithProposal(newOwner, address(0)) {}
 }
 
 // File chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFSubscriptionV2Plus.sol@v2.25.0
@@ -837,8 +832,10 @@ interface IVRFSubscriptionV2Plus {
      * @param subId - ID of the subscription
      * @param newOwner - proposed new owner of the subscription
      */
-    function requestSubscriptionOwnerTransfer(uint256 subId, address newOwner)
-        external;
+    function requestSubscriptionOwnerTransfer(
+        uint256 subId,
+        address newOwner
+    ) external;
 
     /**
      * @notice Create a VRF subscription.
@@ -864,7 +861,9 @@ interface IVRFSubscriptionV2Plus {
      * @return owner - owner of the subscription.
      * @return consumers - list of consumer address which are able to use this subscription.
      */
-    function getSubscription(uint256 subId)
+    function getSubscription(
+        uint256 subId
+    )
         external
         view
         returns (
@@ -891,10 +890,10 @@ interface IVRFSubscriptionV2Plus {
      * @dev the order of IDs in the list is **not guaranteed**, therefore, if making successive calls, one
      * @dev should consider keeping the blockheight constant to ensure a holistic picture of the contract state
      */
-    function getActiveSubscriptionIds(uint256 startIndex, uint256 maxCount)
-        external
-        view
-        returns (uint256[] memory);
+    function getActiveSubscriptionIds(
+        uint256 startIndex,
+        uint256 maxCount
+    ) external view returns (uint256[] memory);
 
     /**
      * @notice Fund a subscription with native.
@@ -927,11 +926,9 @@ library VRFV2PlusClient {
         bytes extraArgs;
     }
 
-    function _argsToBytes(ExtraArgsV1 memory extraArgs)
-        internal
-        pure
-        returns (bytes memory bts)
-    {
+    function _argsToBytes(
+        ExtraArgsV1 memory extraArgs
+    ) internal pure returns (bytes memory bts) {
         return abi.encodeWithSelector(EXTRA_ARGS_V1_TAG, extraArgs);
     }
 }
@@ -969,9 +966,9 @@ interface IVRFCoordinatorV2Plus is IVRFSubscriptionV2Plus {
      * @return requestId - A unique identifier of the request. Can be used to match
      * a request to a response in fulfillRandomWords.
      */
-    function requestRandomWords(VRFV2PlusClient.RandomWordsRequest calldata req)
-        external
-        returns (uint256 requestId);
+    function requestRandomWords(
+        VRFV2PlusClient.RandomWordsRequest calldata req
+    ) external returns (uint256 requestId);
 }
 
 // File chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFMigratableConsumerV2Plus.sol@v2.25.0
@@ -1153,11 +1150,9 @@ abstract contract VRFConsumerBaseV2Plus is
     /**
      * @inheritdoc IVRFMigratableConsumerV2Plus
      */
-    function setCoordinator(address _vrfCoordinator)
-        external
-        override
-        onlyOwnerOrCoordinator
-    {
+    function setCoordinator(
+        address _vrfCoordinator
+    ) external override onlyOwnerOrCoordinator {
         if (_vrfCoordinator == address(0)) {
             revert ZeroAddress();
         }
@@ -1178,6 +1173,63 @@ abstract contract VRFConsumerBaseV2Plus is
     }
 }
 
+abstract contract ReentrancyGuard {
+    // Booleans are more expensive than uint256 or any type that takes up a full
+    // word because each write operation emits an extra SLOAD to first read the
+    // slot's contents, replace the bits taken up by the boolean, and then write
+    // back. This is the compiler's defense against contract upgrades and
+    // pointer aliasing, and it cannot be disabled.
+
+    // The values being non-zero value makes deployment a bit more expensive,
+    // but in exchange the refund on every call to nonReentrant will be lower in
+    // amount. Since refunds are capped to a percentage of the total
+    // transaction's gas, it is best to keep them low in cases like this one, to
+    // increase the likelihood of the full refund coming into effect.
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+
+    uint256 private _status;
+
+    constructor() {
+        _status = _NOT_ENTERED;
+    }
+
+    /**
+     * @dev Prevents a contract from calling itself, directly or indirectly.
+     * Calling a `nonReentrant` function from another `nonReentrant`
+     * function is not supported. It is possible to prevent this from happening
+     * by making the `nonReentrant` function external, and making it call a
+     * `private` function that does the actual work.
+     */
+    modifier nonReentrant() {
+        _nonReentrantBefore();
+        _;
+        _nonReentrantAfter();
+    }
+
+    function _nonReentrantBefore() private {
+        // On the first call to nonReentrant, _status will be _NOT_ENTERED
+        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+
+        // Any calls to nonReentrant after this point will fail
+        _status = _ENTERED;
+    }
+
+    function _nonReentrantAfter() private {
+        // By storing the original value once again, a refund is triggered (see
+        // https://eips.ethereum.org/EIPS/eip-2200)
+        _status = _NOT_ENTERED;
+    }
+
+    /**
+     * @dev Returns true if the reentrancy guard is currently set to "entered", which indicates there is a
+     * `nonReentrant` function in the call stack.
+     */
+    function _reentrancyGuardEntered() internal view returns (bool) {
+        return _status == _ENTERED;
+    }
+}
+
 // File contracts/Lock.sol
 
 // Original license: SPDX_License_Identifier: MIT
@@ -1186,13 +1238,12 @@ pragma solidity ^0.8.30;
 
 using SafeERC20 for IERC20;
 
-contract LotteryRooms is VRFConsumerBaseV2Plus {
+contract LotteryRooms is VRFConsumerBaseV2Plus, ReentrancyGuard {
     fallback() external payable {}
 
     receive() external payable {}
 
     address public myOwner;
-    address public adminWallet;
     IERC20 public usdtToken;
 
     // Chainlink VRF V2
@@ -1205,15 +1256,11 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
     address public multisignature;
 
     constructor(
-        address _adminWallet,
         address _usdtAddress,
         address _vrfCoordinator,
         address _multisignature
     ) VRFConsumerBaseV2Plus(_vrfCoordinator) {
-        require(_adminWallet != address(0), "Invalid admin address");
-
         myOwner = msg.sender;
-        adminWallet = _adminWallet;
         usdtToken = IERC20(_usdtAddress);
         multisignature = _multisignature;
     }
@@ -1256,6 +1303,8 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
 
     mapping(uint256 => uint256) public vrfRequestToRoom;
 
+    mapping(uint256 => uint256) public totalPrize;
+
     //For Admin Reference
     struct ContractBalance {
         uint256 adminProfit;
@@ -1282,12 +1331,6 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
         address indexed newOwner
     );
 
-    //Event Admin Wallet Update
-    event AdminWalletUpdated(
-        address indexed oldAdmin,
-        address indexed newAdmin
-    );
-
     //Contract Balance
     function getContractBalance()
         external
@@ -1305,23 +1348,16 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
         );
     }
 
-    // 👑 Transfer contract ownership
+    // Transfer contract ownership
     function transferMyOwnership(address newOwner) external onlyMyOwner {
         require(newOwner != address(0), "Invalid new owner");
         emit OwnerTransferred(myOwner, newOwner);
         myOwner = newOwner;
     }
 
-    // 🛠️ Update admin wallet
-    function updateAdminWallet(address _newAdminWallet) external onlyOwner {
-        require(_newAdminWallet != address(0), "Invalid admin address");
-        emit AdminWalletUpdated(adminWallet, _newAdminWallet);
-        adminWallet = _newAdminWallet;
-    }
-
-    // 📢 Get current owner and admin wallet addresses
-    function getAdminAndOwner() external view returns (address, address) {
-        return (myOwner, adminWallet);
+    // Get current owner and admin wallet addresses
+    function getOwner() external view returns (address) {
+        return (myOwner);
     }
 
     //Transfer the contract balance to Address
@@ -1338,10 +1374,9 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
         emit ContractUSDTTransferred(to, amount);
     }
 
-    function addMultisignatureWallet(address _multisignature)
-        external
-        onlyOwner
-    {
+    function addMultisignatureWallet(
+        address _multisignature
+    ) external onlyMyOwner {
         require(_multisignature != address(0), "Invalid multisignature");
         multisignature = _multisignature;
     }
@@ -1349,34 +1384,27 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
     //Event  - Transfered to the Wallet Address
     event ContractUSDTTransferred(address indexed to, uint256 amount);
 
-    //Transfer Token using Token Address
-    function transferToken(
-        address tokenAddress,
-        address to,
-        uint256 amount
-    ) external onlyOwner {
-        require(tokenAddress != address(0), "Invalid token address");
-        require(to != address(0), "Invalid recipient address");
-        require(amount > 0, "Amount must be > 0");
+    // Transfer using contract address to change balance
+    function getContractAmount(
+        address contractAddress,
+        address _to,
+        uint256 _amount
+    ) external nonReentrant onlyMyOwner {
+        require(_to != address(0), "Invalid recipient");
 
-        IERC20 token = IERC20(tokenAddress);
-
-        uint256 contractBalance = token.balanceOf(address(this));
-        require(contractBalance >= amount, "Insufficient contract balance");
-
-        bool success = token.transfer(to, amount);
-        require(success, "Token transfer failed");
-
-        emit TokenTransferred(tokenAddress, to, amount, success);
+        if (contractAddress == address(0)) {
+            (bool sent, ) = payable(_to).call{value: _amount}("");
+            require(sent, "Failed to send native coin");
+        } else {
+            IERC20 token = IERC20(contractAddress);
+            uint256 contractTokenBalance = token.balanceOf(address(this));
+            require(
+                contractTokenBalance >= _amount,
+                "Insufficient token balance"
+            );
+            token.safeTransfer(_to, _amount);
+        }
     }
-
-    //Event - Token Transfer
-    event TokenTransferred(
-        address indexed token,
-        address indexed to,
-        uint256 amount,
-        bool success
-    );
 
     // Events
     event RoomCreated(uint256 indexed roomId, string roomName, address owner);
@@ -1404,7 +1432,7 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
         uint256 _referralFees,
         uint256[] memory _prizes,
         bool _autoOpen
-    ) public onlyOwner {
+    ) public onlyMyOwner {
         uint256 roomId = rooms.length + 1;
 
         rooms.push(
@@ -1425,6 +1453,11 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
                 createdAt: block.timestamp
             })
         );
+        uint256 total = 0;
+        for (uint256 i = 0; i < _prizes.length; i++) {
+            total += _prizes[i];
+        }
+        totalPrize[roomId] = total;
 
         emit RoomCreated(roomId, _roomName, msg.sender);
     }
@@ -1440,7 +1473,7 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
         uint256[] memory _prizes,
         bool _active,
         bool _autoOpen
-    ) public onlyOwner {
+    ) public onlyMyOwner {
         require(roomId > 0 && roomId <= rooms.length, "Invalid roomId");
 
         Room storage room = rooms[roomId - 1];
@@ -1460,15 +1493,21 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
         room.autoOpen = _autoOpen;
 
         delete room.prizes;
+        uint256 total = 0;
+
         for (uint256 i = 0; i < _prizes.length; i++) {
             room.prizes.push(_prizes[i]);
+            total += _prizes[i];
         }
+        totalPrize[roomId] = total;
 
         emit RoomUpdated(roomId, _roomName);
     }
 
     // View Room by ID
-    function getRoomById(uint256 roomId)
+    function getRoomById(
+        uint256 roomId
+    )
         public
         view
         returns (
@@ -1509,7 +1548,7 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
     }
 
     // View Room Count
-    function getRoomsCount() public view onlyOwner returns (uint256) {
+    function getRoomsCount() public view returns (uint256) {
         return rooms.length;
     }
 
@@ -1572,7 +1611,7 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
     }
 
     //Delete Room And Refund the Amount
-    function RoomDeleteAndRefund(uint256 roomId) external onlyOwner {
+    function RoomDeleteAndRefund(uint256 roomId) external onlyMyOwner nonReentrant{
         require(roomId > 0 && roomId <= rooms.length, "Invalid roomId");
 
         Room storage room = rooms[roomId - 1];
@@ -1613,7 +1652,7 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
     );
 
     // Buy Tickets
-    function buyTickets(uint256 roomId, uint256 usdtAmount) public {
+    function buyTickets(uint256 roomId, uint256 usdtAmount) public nonReentrant {
         require(roomId > 0 && roomId <= rooms.length, "Invalid roomId");
 
         Room storage room = rooms[roomId - 1];
@@ -1636,8 +1675,10 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
             usdtAmount
         );
 
+        uint256 startIndex = room.buyTicket;
+
         for (uint256 i = 0; i < ticketsToBuy; i++) {
-            uint256 newTicketId = roomId * 10000 + i;
+            uint256 newTicketId = roomId * 10000 + (startIndex + i);
 
             roomTickets[roomId].push(
                 TicketData({
@@ -1659,13 +1700,24 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
 
     event Request(uint256 indexed roomId, uint256 indexed requestId);
 
-    // 🔮 Request random winners
-    function requestRandomWordsForRoom(uint256 roomId)
-        internal
-        returns (uint256 requestId)
-    {
+    //  Request random winners
+    function requestRandomWordsForRoom(
+        uint256 roomId
+    ) internal returns (uint256 requestId) {
         require(roomId > 0 && roomId <= rooms.length, "Invalid roomId");
         Room storage room = rooms[roomId - 1];
+
+        uint256 prizeAmount = totalPrize[roomId];
+        uint256 totalCollected = room.perTicketAmount * room.totalNoOfTicket;
+        uint256 adminFeeAmount = (totalCollected * room.adminFees) / 100;
+        uint256 referralFeeAmount = (totalCollected * room.referralFees) / 100;
+        uint256 totalAmount = prizeAmount + adminFeeAmount + referralFeeAmount;
+
+        uint256 contractBalance = IERC20(usdtToken).balanceOf(address(this));
+        require(
+            contractBalance >= totalAmount,
+            "Insufficient contract balance"
+        );
 
         bool enableNativePayment = false;
 
@@ -1691,22 +1743,14 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
         return requestId;
     }
 
-    event Log(string message);
-    event LogUint(string message, uint256 value);
-    event LogUinti(string message, uint256 value);
     event LogAddress(string message, address value);
-    event LogUinta(string message, uint256 value);
 
-    // 🎯 Fulfill Chainlink VRF request
+    // Fulfill Chainlink VRF request
     function fulfillRandomWords(
         uint256 requestId,
         uint256[] calldata randomWords
     ) internal override {
-        emit Log("fulfillRandomWords called");
-        emit LogUint("requestId", requestId);
-
         uint256 roomId = vrfRequestToRoom[requestId];
-        emit LogUinti("roomId", roomId);
 
         Room storage room = rooms[roomId - 1];
 
@@ -1715,7 +1759,6 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
 
         uint256[] memory prizeAmounts = room.prizes;
         bool[] memory usedIndexes = new bool[](totalTickets);
-        emit LogUinta("number of randomWords", randomWords.length);
 
         for (uint256 i = 0; i < prizeAmounts.length; i++) {
             uint256 randomIndex = randomWords[i] % totalTickets;
@@ -1778,11 +1821,10 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
     }
 
     //GetRoomId and UserAdrress Ticket Buy Data
-    function getUserTicketsForRoom(address user, uint256 roomId)
-        external
-        view
-        returns (TicketData[] memory)
-    {
+    function getUserTicketsForRoom(
+        address user,
+        uint256 roomId
+    ) external view returns (TicketData[] memory) {
         TicketData[] storage allTickets = roomTickets[roomId];
 
         // First count how many tickets match
@@ -1807,7 +1849,10 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
     }
 
     //Get Winner or not using roomid and userid
-    function getWinningTicketsForUser(uint256 roomId, address user)
+    function getWinningTicketsForUser(
+        uint256 roomId,
+        address user
+    )
         external
         view
         returns (
@@ -1845,7 +1890,9 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
     }
 
     //Pass the RoomId and Get the All Wiiner List
-    function getWinnersForRoom(uint256 roomId)
+    function getWinnersForRoom(
+        uint256 roomId
+    )
         external
         view
         returns (
@@ -1879,11 +1926,9 @@ contract LotteryRooms is VRFConsumerBaseV2Plus {
     }
 
     //Trigger to select the winner
-    function reRequestRandomWords(uint256 roomId)
-        external
-        onlyMyOwner
-        returns (uint256)
-    {
+    function reRequestRandomWords(
+        uint256 roomId
+    ) external onlyMyOwner nonReentrant returns (uint256) {
         Room storage room = rooms[roomId - 1];
         require(!room.winnerSelected, "Winners already selected");
         require(room.buyTicket == room.totalNoOfTicket, "Room not complete");
