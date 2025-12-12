@@ -1,10 +1,10 @@
 /**
  *Submitted for verification at Etherscan.io on 2025-08-20
-*/
+ */
 
 /**
  *Submitted for verification at Etherscan.io on 2025-07-24
-*/
+ */
 
 // Sources flattened with hardhat v2.24.2 https://hardhat.org
 
@@ -17,85 +17,77 @@
 pragma solidity ^0.8.20;
 
 library CalldataBytesLib {
-    function toU8(bytes calldata _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint8)
-    {
+    function toU8(
+        bytes calldata _bytes,
+        uint256 _start
+    ) internal pure returns (uint8) {
         return uint8(_bytes[_start]);
     }
 
-    function toU16(bytes calldata _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint16)
-    {
+    function toU16(
+        bytes calldata _bytes,
+        uint256 _start
+    ) internal pure returns (uint16) {
         unchecked {
             uint256 end = _start + 2;
             return uint16(bytes2(_bytes[_start:end]));
         }
     }
 
-    function toU32(bytes calldata _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint32)
-    {
+    function toU32(
+        bytes calldata _bytes,
+        uint256 _start
+    ) internal pure returns (uint32) {
         unchecked {
             uint256 end = _start + 4;
             return uint32(bytes4(_bytes[_start:end]));
         }
     }
 
-    function toU64(bytes calldata _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint64)
-    {
+    function toU64(
+        bytes calldata _bytes,
+        uint256 _start
+    ) internal pure returns (uint64) {
         unchecked {
             uint256 end = _start + 8;
             return uint64(bytes8(_bytes[_start:end]));
         }
     }
 
-    function toU128(bytes calldata _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint128)
-    {
+    function toU128(
+        bytes calldata _bytes,
+        uint256 _start
+    ) internal pure returns (uint128) {
         unchecked {
             uint256 end = _start + 16;
             return uint128(bytes16(_bytes[_start:end]));
         }
     }
 
-    function toU256(bytes calldata _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint256)
-    {
+    function toU256(
+        bytes calldata _bytes,
+        uint256 _start
+    ) internal pure returns (uint256) {
         unchecked {
             uint256 end = _start + 32;
             return uint256(bytes32(_bytes[_start:end]));
         }
     }
 
-    function toAddr(bytes calldata _bytes, uint256 _start)
-        internal
-        pure
-        returns (address)
-    {
+    function toAddr(
+        bytes calldata _bytes,
+        uint256 _start
+    ) internal pure returns (address) {
         unchecked {
             uint256 end = _start + 20;
             return address(bytes20(_bytes[_start:end]));
         }
     }
 
-    function toB32(bytes calldata _bytes, uint256 _start)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function toB32(
+        bytes calldata _bytes,
+        uint256 _start
+    ) internal pure returns (bytes32) {
         unchecked {
             uint256 end = _start + 32;
             return bytes32(_bytes[_start:end]);
@@ -134,14 +126,13 @@ library ExecutorOptions {
     /// @return optionType the type of the option
     /// @return option the option of the executor
     /// @return cursor the cursor to start decoding the next executor option
-    function nextExecutorOption(bytes calldata _options, uint256 _cursor)
+    function nextExecutorOption(
+        bytes calldata _options,
+        uint256 _cursor
+    )
         internal
         pure
-        returns (
-            uint8 optionType,
-            bytes calldata option,
-            uint256 cursor
-        )
+        returns (uint8 optionType, bytes calldata option, uint256 cursor)
     {
         unchecked {
             // skip worker id
@@ -162,36 +153,26 @@ library ExecutorOptions {
         }
     }
 
-    function decodeLzReceiveOption(bytes calldata _option)
-        internal
-        pure
-        returns (uint128 gas, uint128 value)
-    {
+    function decodeLzReceiveOption(
+        bytes calldata _option
+    ) internal pure returns (uint128 gas, uint128 value) {
         if (_option.length != 16 && _option.length != 32)
             revert Executor_InvalidLzReceiveOption();
         gas = _option.toU128(0);
         value = _option.length == 32 ? _option.toU128(16) : 0;
     }
 
-    function decodeNativeDropOption(bytes calldata _option)
-        internal
-        pure
-        returns (uint128 amount, bytes32 receiver)
-    {
+    function decodeNativeDropOption(
+        bytes calldata _option
+    ) internal pure returns (uint128 amount, bytes32 receiver) {
         if (_option.length != 48) revert Executor_InvalidNativeDropOption();
         amount = _option.toU128(0);
         receiver = _option.toB32(16);
     }
 
-    function decodeLzComposeOption(bytes calldata _option)
-        internal
-        pure
-        returns (
-            uint16 index,
-            uint128 gas,
-            uint128 value
-        )
-    {
+    function decodeLzComposeOption(
+        bytes calldata _option
+    ) internal pure returns (uint16 index, uint128 gas, uint128 value) {
         if (_option.length != 18 && _option.length != 34)
             revert Executor_InvalidLzComposeOption();
         index = _option.toU16(0);
@@ -199,15 +180,9 @@ library ExecutorOptions {
         value = _option.length == 34 ? _option.toU128(18) : 0;
     }
 
-    function decodeLzReadOption(bytes calldata _option)
-        internal
-        pure
-        returns (
-            uint128 gas,
-            uint32 calldataSize,
-            uint128 value
-        )
-    {
+    function decodeLzReadOption(
+        bytes calldata _option
+    ) internal pure returns (uint128 gas, uint32 calldataSize, uint128 value) {
         if (_option.length != 20 && _option.length != 36)
             revert Executor_InvalidLzReadOption();
         gas = _option.toU128(0);
@@ -215,22 +190,20 @@ library ExecutorOptions {
         value = _option.length == 36 ? _option.toU128(20) : 0;
     }
 
-    function encodeLzReceiveOption(uint128 _gas, uint128 _value)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function encodeLzReceiveOption(
+        uint128 _gas,
+        uint128 _value
+    ) internal pure returns (bytes memory) {
         return
             _value == 0
                 ? abi.encodePacked(_gas)
                 : abi.encodePacked(_gas, _value);
     }
 
-    function encodeNativeDropOption(uint128 _amount, bytes32 _receiver)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function encodeNativeDropOption(
+        uint128 _amount,
+        bytes32 _receiver
+    ) internal pure returns (bytes memory) {
         return abi.encodePacked(_amount, _receiver);
     }
 
@@ -280,11 +253,10 @@ library BitMaps {
     /**
      * @dev Sets the bit at `index`.
      */
-    function set(BitMap256 bitmap, uint8 index)
-        internal
-        pure
-        returns (BitMap256)
-    {
+    function set(
+        BitMap256 bitmap,
+        uint8 index
+    ) internal pure returns (BitMap256) {
         uint256 mask = 1 << index;
         return BitMap256.wrap(BitMap256.unwrap(bitmap) | mask);
     }
@@ -303,11 +275,10 @@ library BitMaps {
 pragma solidity >=0.8.0 <0.9.0;
 
 library BytesLib {
-    function concat(bytes memory _preBytes, bytes memory _postBytes)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function concat(
+        bytes memory _preBytes,
+        bytes memory _postBytes
+    ) internal pure returns (bytes memory) {
         bytes memory tempBytes;
 
         assembly {
@@ -381,9 +352,10 @@ library BytesLib {
         return tempBytes;
     }
 
-    function concatStorage(bytes storage _preBytes, bytes memory _postBytes)
-        internal
-    {
+    function concatStorage(
+        bytes storage _preBytes,
+        bytes memory _postBytes
+    ) internal {
         assembly {
             // Read the first 32 bytes of _preBytes storage, which is the length
             // of the array. (We don't need to use the offset into the slot
@@ -601,11 +573,10 @@ library BytesLib {
         return tempBytes;
     }
 
-    function toAddress(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (address)
-    {
+    function toAddress(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (address) {
         require(_bytes.length >= _start + 20, "toAddress_outOfBounds");
         address tempAddress;
 
@@ -619,11 +590,10 @@ library BytesLib {
         return tempAddress;
     }
 
-    function toUint8(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint8)
-    {
+    function toUint8(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (uint8) {
         require(_bytes.length >= _start + 1, "toUint8_outOfBounds");
         uint8 tempUint;
 
@@ -634,11 +604,10 @@ library BytesLib {
         return tempUint;
     }
 
-    function toUint16(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint16)
-    {
+    function toUint16(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (uint16) {
         require(_bytes.length >= _start + 2, "toUint16_outOfBounds");
         uint16 tempUint;
 
@@ -649,11 +618,10 @@ library BytesLib {
         return tempUint;
     }
 
-    function toUint32(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint32)
-    {
+    function toUint32(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (uint32) {
         require(_bytes.length >= _start + 4, "toUint32_outOfBounds");
         uint32 tempUint;
 
@@ -664,11 +632,10 @@ library BytesLib {
         return tempUint;
     }
 
-    function toUint64(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint64)
-    {
+    function toUint64(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (uint64) {
         require(_bytes.length >= _start + 8, "toUint64_outOfBounds");
         uint64 tempUint;
 
@@ -679,11 +646,10 @@ library BytesLib {
         return tempUint;
     }
 
-    function toUint96(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint96)
-    {
+    function toUint96(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (uint96) {
         require(_bytes.length >= _start + 12, "toUint96_outOfBounds");
         uint96 tempUint;
 
@@ -694,11 +660,10 @@ library BytesLib {
         return tempUint;
     }
 
-    function toUint128(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint128)
-    {
+    function toUint128(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (uint128) {
         require(_bytes.length >= _start + 16, "toUint128_outOfBounds");
         uint128 tempUint;
 
@@ -709,11 +674,10 @@ library BytesLib {
         return tempUint;
     }
 
-    function toUint256(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (uint256)
-    {
+    function toUint256(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (uint256) {
         require(_bytes.length >= _start + 32, "toUint256_outOfBounds");
         uint256 tempUint;
 
@@ -724,11 +688,10 @@ library BytesLib {
         return tempUint;
     }
 
-    function toBytes32(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function toBytes32(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (bytes32) {
         require(_bytes.length >= _start + 32, "toBytes32_outOfBounds");
         bytes32 tempBytes32;
 
@@ -739,11 +702,10 @@ library BytesLib {
         return tempBytes32;
     }
 
-    function equal(bytes memory _preBytes, bytes memory _postBytes)
-        internal
-        pure
-        returns (bool)
-    {
+    function equal(
+        bytes memory _preBytes,
+        bytes memory _postBytes
+    ) internal pure returns (bool) {
         bool success = true;
 
         assembly {
@@ -763,9 +725,9 @@ library BytesLib {
 
                 for {
                     let cc := add(_postBytes, 0x20)
+                } eq(add(lt(mc, end), cb), 2) {
                     // the next line is the loop condition:
                     // while(uint256(mc < end) + cb == 2)
-                } eq(add(lt(mc, end), cb), 2) {
                     mc := add(mc, 0x20)
                     cc := add(cc, 0x20)
                 } {
@@ -786,11 +748,10 @@ library BytesLib {
         return success;
     }
 
-    function equalStorage(bytes storage _preBytes, bytes memory _postBytes)
-        internal
-        view
-        returns (bool)
-    {
+    function equalStorage(
+        bytes storage _preBytes,
+        bytes memory _postBytes
+    ) internal view returns (bool) {
         bool success = true;
 
         assembly {
@@ -836,9 +797,7 @@ library BytesLib {
 
                         // the next line is the loop condition:
                         // while(uint256(mc < end) + cb == 2)
-                        for {
-
-                        } eq(add(lt(mc, end), cb), 2) {
+                        for {} eq(add(lt(mc, end), cb), 2) {
                             sc := add(sc, 1)
                             mc := add(mc, 0x20)
                         } {
@@ -884,7 +843,9 @@ library DVNOptions {
     ///        dvn_id: uint8, dvn_idx: uint8, option_size: uint16, option_type: uint8, option: bytes
     /// @return dvnOptions the grouped options, still share the same format of _options
     /// @return dvnIndices the dvn indices
-    function groupDVNOptionsByIdx(bytes memory _options)
+    function groupDVNOptionsByIdx(
+        bytes memory _options
+    )
         internal
         pure
         returns (bytes[] memory dvnOptions, uint8[] memory dvnIndices)
@@ -979,11 +940,9 @@ library DVNOptions {
 
     /// @dev get the number of unique dvns
     /// @param _options the format is the same as groupDVNOptionsByIdx
-    function getNumDVNs(bytes memory _options)
-        internal
-        pure
-        returns (uint8 numDVNs)
-    {
+    function getNumDVNs(
+        bytes memory _options
+    ) internal pure returns (uint8 numDVNs) {
         uint256 cursor = 0;
         BitMap256 bitmap;
 
@@ -1022,14 +981,13 @@ library DVNOptions {
     /// @return optionType the type of the option
     /// @return option the option
     /// @return cursor the cursor to start decoding the next option
-    function nextDVNOption(bytes calldata _options, uint256 _cursor)
+    function nextDVNOption(
+        bytes calldata _options,
+        uint256 _cursor
+    )
         internal
         pure
-        returns (
-            uint8 optionType,
-            bytes calldata option,
-            uint256 cursor
-        )
+        returns (uint8 optionType, bytes calldata option, uint256 cursor)
     {
         unchecked {
             // skip worker id
@@ -1110,10 +1068,9 @@ interface IMessageLibManager {
         uint256 _expiry
     ) external;
 
-    function defaultReceiveLibraryTimeout(uint32 _eid)
-        external
-        view
-        returns (address lib, uint256 expiry);
+    function defaultReceiveLibraryTimeout(
+        uint32 _eid
+    ) external view returns (address lib, uint256 expiry);
 
     function isSupportedEid(uint32 _eid) external view returns (bool);
 
@@ -1130,15 +1087,15 @@ interface IMessageLibManager {
         address _newLib
     ) external;
 
-    function getSendLibrary(address _sender, uint32 _eid)
-        external
-        view
-        returns (address lib);
+    function getSendLibrary(
+        address _sender,
+        uint32 _eid
+    ) external view returns (address lib);
 
-    function isDefaultSendLibrary(address _sender, uint32 _eid)
-        external
-        view
-        returns (bool);
+    function isDefaultSendLibrary(
+        address _sender,
+        uint32 _eid
+    ) external view returns (bool);
 
     function setReceiveLibrary(
         address _oapp,
@@ -1147,10 +1104,10 @@ interface IMessageLibManager {
         uint256 _gracePeriod
     ) external;
 
-    function getReceiveLibrary(address _receiver, uint32 _eid)
-        external
-        view
-        returns (address lib, bool isDefault);
+    function getReceiveLibrary(
+        address _receiver,
+        uint32 _eid
+    ) external view returns (address lib, bool isDefault);
 
     function setReceiveLibraryTimeout(
         address _oapp,
@@ -1159,10 +1116,10 @@ interface IMessageLibManager {
         uint256 _expiry
     ) external;
 
-    function receiveLibraryTimeout(address _receiver, uint32 _eid)
-        external
-        view
-        returns (address lib, uint256 expiry);
+    function receiveLibraryTimeout(
+        address _receiver,
+        uint32 _eid
+    ) external view returns (address lib, uint256 expiry);
 
     function setConfig(
         address _oapp,
@@ -1396,15 +1353,15 @@ interface ILayerZeroEndpointV2 is
 
     event DelegateSet(address sender, address delegate);
 
-    function quote(MessagingParams calldata _params, address _sender)
-        external
-        view
-        returns (MessagingFee memory);
+    function quote(
+        MessagingParams calldata _params,
+        address _sender
+    ) external view returns (MessagingFee memory);
 
-    function send(MessagingParams calldata _params, address _refundAddress)
-        external
-        payable
-        returns (MessagingReceipt memory);
+    function send(
+        MessagingParams calldata _params,
+        address _refundAddress
+    ) external payable returns (MessagingReceipt memory);
 
     function verify(
         Origin calldata _origin,
@@ -1412,15 +1369,15 @@ interface ILayerZeroEndpointV2 is
         bytes32 _payloadHash
     ) external;
 
-    function verifiable(Origin calldata _origin, address _receiver)
-        external
-        view
-        returns (bool);
+    function verifiable(
+        Origin calldata _origin,
+        address _receiver
+    ) external view returns (bool);
 
-    function initializable(Origin calldata _origin, address _receiver)
-        external
-        view
-        returns (bool);
+    function initializable(
+        Origin calldata _origin,
+        address _receiver
+    ) external view returns (bool);
 
     function lzReceive(
         Origin calldata _origin,
@@ -2823,12 +2780,9 @@ library OptionsBuilder {
      * @param _options The existing options container.
      * @return options The updated options container.
      */
-    function addExecutorOrderedExecutionOption(bytes memory _options)
-        internal
-        pure
-        onlyType3(_options)
-        returns (bytes memory)
-    {
+    function addExecutorOrderedExecutionOption(
+        bytes memory _options
+    ) internal pure onlyType3(_options) returns (bytes memory) {
         return
             addExecutorOption(
                 _options,
@@ -2843,12 +2797,10 @@ library OptionsBuilder {
      * @param _dvnIdx The DVN index for the pre-crime option.
      * @return options The updated options container.
      */
-    function addDVNPreCrimeOption(bytes memory _options, uint8 _dvnIdx)
-        internal
-        pure
-        onlyType3(_options)
-        returns (bytes memory)
-    {
+    function addDVNPreCrimeOption(
+        bytes memory _options,
+        uint8 _dvnIdx
+    ) internal pure onlyType3(_options) returns (bytes memory) {
         return
             addDVNOption(
                 _options,
@@ -2910,11 +2862,9 @@ library OptionsBuilder {
      * @param _executionGas The gasLimit value passed to lzReceive().
      * @return legacyOptions The encoded legacy options.
      */
-    function encodeLegacyOptionsType1(uint256 _executionGas)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function encodeLegacyOptionsType1(
+        uint256 _executionGas
+    ) internal pure returns (bytes memory) {
         if (_executionGas > type(uint128).max)
             revert InvalidSize(type(uint128).max, _executionGas);
         return abi.encodePacked(TYPE_1, _executionGas);
@@ -3142,12 +3092,9 @@ abstract contract OAppCore is IOAppCore, Ownable {
      * @param _eid The endpoint ID.
      * @return peer The address of the peer associated with the specified endpoint.
      */
-    function _getPeerOrRevert(uint32 _eid)
-        internal
-        view
-        virtual
-        returns (bytes32)
-    {
+    function _getPeerOrRevert(
+        uint32 _eid
+    ) internal view virtual returns (bytes32) {
         bytes32 peer = peers[_eid];
         if (peer == bytes32(0)) revert NoPeer(_eid);
         return peer;
@@ -3255,10 +3202,10 @@ interface IERC20 {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
+    function allowance(
+        address owner,
+        address spender
+    ) external view returns (uint256);
 
     /**
      * @dev Sets a `value` amount of tokens as the allowance of `spender` over the
@@ -3386,9 +3333,10 @@ interface IERC1363 is IERC20, IERC165 {
      * @param value The amount of tokens to be spent.
      * @return A boolean value indicating whether the operation succeeded unless throwing.
      */
-    function approveAndCall(address spender, uint256 value)
-        external
-        returns (bool);
+    function approveAndCall(
+        address spender,
+        uint256 value
+    ) external returns (bool);
 
     /**
      * @dev Sets a `value` amount of tokens as the allowance of `spender` over the
@@ -3440,11 +3388,7 @@ library SafeERC20 {
      * @dev Transfer `value` amount of `token` from the calling contract to `to`. If `token` returns no value,
      * non-reverting calls are assumed to be successful.
      */
-    function safeTransfer(
-        IERC20 token,
-        address to,
-        uint256 value
-    ) internal {
+    function safeTransfer(IERC20 token, address to, uint256 value) internal {
         _callOptionalReturn(token, abi.encodeCall(token.transfer, (to, value)));
     }
 
@@ -3697,10 +3641,10 @@ library SafeERC20 {
      *
      * This is a variant of {_callOptionalReturn} that silently catches all reverts and returns a bool instead.
      */
-    function _callOptionalReturnBool(IERC20 token, bytes memory data)
-        private
-        returns (bool)
-    {
+    function _callOptionalReturnBool(
+        IERC20 token,
+        bytes memory data
+    ) private returns (bool) {
         bool success;
         uint256 returnSize;
         uint256 returnValue;
@@ -3845,11 +3789,9 @@ abstract contract OAppSender is OAppCore {
      * @dev Some EVMs use an ERC20 as a method for paying transactions/gasFees.
      * @dev The endpoint is EITHER/OR, ie. it will NOT support both types of native payment at a time.
      */
-    function _payNative(uint256 _nativeFee)
-        internal
-        virtual
-        returns (uint256 nativeFee)
-    {
+    function _payNative(
+        uint256 _nativeFee
+    ) internal virtual returns (uint256 nativeFee) {
         if (msg.value != _nativeFee) revert NotEnoughNative(msg.value);
         return _nativeFee;
     }
@@ -3990,7 +3932,9 @@ interface IOFT {
      * @return oftFeeDetails The details of OFT fees.
      * @return receipt The OFT receipt information.
      */
-    function quoteOFT(SendParam calldata _sendParam)
+    function quoteOFT(
+        SendParam calldata _sendParam
+    )
         external
         view
         returns (
@@ -4009,10 +3953,10 @@ interface IOFT {
      *  - nativeFee: The native fee.
      *  - lzTokenFee: The lzToken fee.
      */
-    function quoteSend(SendParam calldata _sendParam, bool _payInLzToken)
-        external
-        view
-        returns (MessagingFee memory);
+    function quoteSend(
+        SendParam calldata _sendParam,
+        bool _payInLzToken
+    ) external view returns (MessagingFee memory);
 
     /**
      * @notice Executes the send() operation.
@@ -4080,7 +4024,6 @@ interface IStargate is IOFT {
     function stargateType() external pure returns (StargateType);
 }
 
-
 abstract contract ReentrancyGuard {
     // Booleans are more expensive than uint256 or any type that takes up a full
     // word because each write operation emits an extra SLOAD to first read the
@@ -4138,9 +4081,7 @@ abstract contract ReentrancyGuard {
     }
 }
 
-
 contract stargateversion2 is ReentrancyGuard {
-
     using SafeERC20 for IERC20;
 
     using OptionsBuilder for bytes;
@@ -4148,7 +4089,7 @@ contract stargateversion2 is ReentrancyGuard {
     address public _stargate;
     uint32 public destinationEndpointId;
     address public usdttokenaddress;
-    uint256 public baseComposeGas = 900_000;  
+    uint256 public baseComposeGas = 900_000;
 
     address public myOwner;
 
@@ -4172,7 +4113,6 @@ contract stargateversion2 is ReentrancyGuard {
         return bytes32(uint256(uint160(_addr)));
     }
 
-
     function changeGasfee(uint256 _gasAmount) external onlyMyOwner {
         baseComposeGas = _gasAmount;
     }
@@ -4184,22 +4124,18 @@ contract stargateversion2 is ReentrancyGuard {
     )
         external
         payable
+        nonReentrant
         returns (
             uint256 valueToSend,
             SendParam memory sendParam,
             MessagingFee memory messagingFee
         )
     {
-        require(destinationContract != address(0),"zero address");
+        require(destinationContract != address(0), "zero address");
         require(amount > 0, "Insufficient Amount");
 
-       
-        bytes memory _composeMsg = abi.encode(
-            msg.sender,
-            _orderId,
-            amount
-        );
-     
+        bytes memory _composeMsg = abi.encode(msg.sender, _orderId, amount);
+
         IERC20 token = IERC20(usdttokenaddress);
         token.safeTransferFrom(msg.sender, address(this), amount);
 
@@ -4209,7 +4145,7 @@ contract stargateversion2 is ReentrancyGuard {
             token.safeApprove(_stargate, type(uint256).max);
         }
         uint256 minAmount = (amount * 90) / 100;
-      
+
         bytes memory extraOptions = _composeMsg.length > 0
             ? OptionsBuilder.newOptions().addExecutorLzComposeOption(
                 0,
@@ -4244,9 +4180,19 @@ contract stargateversion2 is ReentrancyGuard {
             messagingFee,
             msg.sender
         );
+
+        //Transfer Left Balance
+        uint256 leftover = address(this).balance;
+        if (leftover > 0) {
+            (bool success, ) = msg.sender.call{value: leftover}("");
+            require(success, "Refund failed");
+        }
     }
 
-    function changeAddress(address _stargateContract, uint32 _dstEid) external onlyMyOwner {
+    function changeAddress(
+        address _stargateContract,
+        uint32 _dstEid
+    ) external onlyMyOwner {
         require(_stargateContract != address(0), "Zero address");
         _stargate = _stargateContract;
         destinationEndpointId = _dstEid;
@@ -4258,24 +4204,23 @@ contract stargateversion2 is ReentrancyGuard {
         uint256 _amount
     ) external nonReentrant onlyMyOwner {
         require(_to != address(0), "Invalid recipient");
+        require(_amount > 0, "Invalid amount");
 
         if (contractAddress == address(0)) {
             (bool sent, ) = payable(_to).call{value: _amount}("");
             require(sent, "Failed to send native coin");
         } else {
+            // Safe ERC20 transfer
             IERC20 token = IERC20(contractAddress);
-            uint256 contractTokenBalance = token.balanceOf(address(this));
-            require(
-                contractTokenBalance >= _amount,
-                "Insufficient token balance"
-            );
-            bool success = token.transfer(_to, _amount);
-            require(success, "Token transfer failed");
+            uint256 balance = token.balanceOf(address(this));
+            require(balance >= _amount, "Insufficient token balance");
+
+            token.safeTransfer(_to, _amount);
         }
     }
 
     function OwnerChange(address _newOwner) public onlyMyOwner {
-        require(_newOwner != address(0),"Zero address");
+        require(_newOwner != address(0), "Zero address");
         myOwner = _newOwner;
     }
 }
