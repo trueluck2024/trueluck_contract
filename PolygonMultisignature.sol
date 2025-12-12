@@ -1,11 +1,3 @@
-/**
- *Submitted for verification at polygonscan.com on 2025-09-04
-*/
-
-/**
- *Submitted for verification at polygonscan.com on 2025-07-09
-*/
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -41,19 +33,17 @@ contract Multisignature {
         _;
     }
 
-    constructor(address[] memory _owners,address _creator, uint256 _required) {
+    constructor(address[] memory _owners, address _creator, uint256 _required) {
         require(_owners.length >= _required, "Invalid config");
         owners = _owners;
         required = _required;
         creator = _creator;
     }
 
-
-    function creatorChange(address _creator) external  { 
-        require(msg.sender != creator, "Creator cannot be removed");
+    function creatorChange(address _creator) external {
+        require(msg.sender != creator, "Creator cannot be Changed");
         creator = _creator;
     }
-
 
     //Get All the Owner List
     function getOwners() external view returns (address[] memory) {
@@ -62,6 +52,8 @@ contract Multisignature {
 
     //Add aditional or Reduced signature required
     function addSignatureRequired(uint256 _value) external onlyOwner {
+        require(_value > 0, "Value must be greater than zero");
+        require(_value <= owners.length, "Cannot exceed total owners");
         required = _value;
     }
 
@@ -96,7 +88,6 @@ contract Multisignature {
     // If enough confirmations are collected, execute the transaction.
     function confirmTransaction(
         address to,
-        uint256 amount,
         uint256 _txIndex
     ) external onlyOwner {
         Transaction storage txObj = transactions[_txIndex];
@@ -107,28 +98,25 @@ contract Multisignature {
         txObj.confirmations += 1;
 
         if (txObj.confirmations >= required) {
-            executeTransaction(to, amount, _txIndex);
+            executeTransaction(to, _txIndex);
         }
     }
 
     // Execute the transaction if enough confirmations are collected.
-    function executeTransaction(
-        address to,
-        uint256 amount,
-        uint256 _txIndex
-    ) internal {
+    function executeTransaction(address to, uint256 _txIndex) internal {
         Transaction storage txObj = transactions[_txIndex];
         require(!txObj.executed, "Already executed");
-        LotteryRooms(txObj.lotterycontract).transferContractUSDT(to, amount);
+        LotteryRooms(txObj.lotterycontract).transferContractUSDT(
+            to,
+            txObj.value
+        );
         txObj.executed = true;
     }
 
     //Get Transaction Approve List
-    function getApprovers(uint256 _txIndex)
-        external
-        view
-        returns (address[] memory)
-    {
+    function getApprovers(
+        uint256 _txIndex
+    ) external view returns (address[] memory) {
         address[] memory approversTemp = new address[](owners.length);
         uint256 count = 0;
 
